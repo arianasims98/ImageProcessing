@@ -6,7 +6,7 @@ import java.awt.image.*;
 import javax.imageio.*;
 import javax.swing.*;
  
-public class Demo extends Component implements ActionListener {
+public class Demo2 extends Component implements ActionListener {
     
     //************************************
     // List of the options(Original, Negative); correspond to the cases:
@@ -23,7 +23,7 @@ public class Demo extends Component implements ActionListener {
     private BufferedImage bi, di, biFiltered, diFiltered;   // the input image saved as bi;//
     int w, h;
      
-    public Demo() {
+    public Demo2() {
         try {
             bi = ImageIO.read(new File("Cameraman.bmp"));
             w = bi.getWidth(null);
@@ -151,6 +151,12 @@ public class Demo extends Component implements ActionListener {
     //************************************
 
 
+
+
+
+
+    
+
     //************************************
     //  You need to register your function here
     //************************************
@@ -197,12 +203,12 @@ public class Demo extends Component implements ActionListener {
     };
  
     public static void main(String s[]) {
-        JFrame f = new JFrame("Image Processing Demo");
+        JFrame f = new JFrame("Image Processing Demo (Lab 2)");
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {System.exit(0);}
         });
         
-        Demo de = new Demo();
+        Demo2 de = new Demo2();
         f.add("Center", de);
 
 

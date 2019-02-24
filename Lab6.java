@@ -8,15 +8,16 @@ import javax.swing.*;
 import java.util.Random;
 import java.lang.Math;
 
-public class Lab5 extends Component implements ActionListener {
+public class Lab6 extends Component implements ActionListener {
 
     // ************************************
     // List of the options(Original, Negative); correspond to the cases:
     // ************************************
 
     String descs[] = { "Original", "Negative", "Shift", "Add", "Subtract", "Multiply", "Divide", "Bitwise Not",
-            "Bitwise And", "Bitwise Or", "Bitwise XOR", "ROI", "Log", "Power", "LUT", "Bit Plane Slice", 
-            "Histogram" };
+            "Bitwise And", "Bitwise Or", "Bitwise XOR", "ROI", "Log", "Power", "LUT", "Bit Plane Slice", "Histogram",
+            "Averaging", "Weighted Averaging", "4-neighbor Laplacian", "8-neighbor Laplacian",
+            "4-Neighbor Laplacian Enhancement", "8-neighbor Laplacian Enhancement", "Roberts", "Sobel X", "Sobel Y"};
 
     int opIndex;
     int lastOp;
@@ -29,7 +30,7 @@ public class Lab5 extends Component implements ActionListener {
     int[] LUT = generateLUT(30);
     int bitPlanes = 7;
 
-    public Lab5() {
+    public Lab6() {
         try {
             bi = ImageIO.read(new File("Barbara.bmp"));
             w = bi.getWidth(null);
@@ -136,7 +137,7 @@ public class Lab5 extends Component implements ActionListener {
     // Example: Image Negative
     // ************************************
     public BufferedImage ImageNegative(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -151,8 +152,7 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return convertToBimage(ImageArray); // Convert the array to BufferedImage
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
@@ -164,7 +164,7 @@ public class Lab5 extends Component implements ActionListener {
 
     // shift and scale
     public BufferedImage rescale(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -240,15 +240,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return convertToBimage(ImageArrayNew);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
     }
 
     public BufferedImage add(BufferedImage imgA, BufferedImage imgB) {
-        try{ 
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
 
@@ -267,15 +266,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(returnMtx));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage subtract(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             int[][][] returnMtx = new int[imgA.getWidth()][imgA.getHeight()][4];
@@ -293,16 +291,15 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(returnMtx));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
-    
+
     }
 
     public BufferedImage multiply(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             int[][] tmpMtx = new int[imgA.getHeight()][imgA.getHeight()];
@@ -330,15 +327,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(returnMtx));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage divide(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             int[][][] returnMtx = new int[imgA.getHeight()][imgA.getHeight()][4];
@@ -351,15 +347,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(returnMtx));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage bitwiseNot(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             // int[][][] returnMtx = new int[imgA.getWidth()][imgA.getHeight()][4];
@@ -380,8 +375,7 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(mtxB));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
@@ -389,7 +383,7 @@ public class Lab5 extends Component implements ActionListener {
     }
 
     public BufferedImage bitwiseAnd(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             // int[][][] returnMtx = new int[imgA.getWidth()][imgA.getHeight()][4];
@@ -410,15 +404,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(mtxB));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage bitwiseOr(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             // int[][][] returnMtx = new int[imgA.getWidth()][imgA.getHeight()][4];
@@ -439,15 +432,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(mtxB));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage bitwiseXOR(BufferedImage imgA, BufferedImage imgB) {
-        try{
+        try {
             int[][][] mtxA = convertToArray(imgA);
             int[][][] mtxB = convertToArray(imgB);
             // int[][][] returnMtx = new int[imgA.getWidth()][imgA.getHeight()][4];
@@ -468,15 +460,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(mtxB));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return imgA;
         }
     }
 
     public BufferedImage log(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -491,15 +482,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(ImageArray)); // Convert the array to BufferedImage
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
     }
 
     public BufferedImage power(BufferedImage timg, float power) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -515,15 +505,14 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(ImageArray)); // Convert the array to BufferedImage
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
     }
 
     public BufferedImage LUT(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -542,30 +531,28 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(ImageArray2)); // Convert the array to BufferedImage
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
     }
 
     public int[] generateLUT(int a) {
-        try{
+        try {
             int[] LUT = new int[256];
 
             for (int i = 0; i < 245; i++) {
                 LUT[i] = i + a;
             }
             return LUT;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return null;
         }
     }
 
     public BufferedImage bitPlaneSlice(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -584,8 +571,7 @@ public class Lab5 extends Component implements ActionListener {
                 }
             }
             return rescale(convertToBimage(ImageArray2)); // Convert the array to BufferedImage
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
@@ -593,7 +579,7 @@ public class Lab5 extends Component implements ActionListener {
 
     // To find the histograms for RGB components of an image
     public BufferedImage histogram(BufferedImage timg) {
-        try{
+        try {
             int width = timg.getWidth();
             int height = timg.getHeight();
 
@@ -618,36 +604,149 @@ public class Lab5 extends Component implements ActionListener {
                     HistogramB[b]++;
                 }
             }
-            //normalise
-            for (int k = 0; k <= 255; k++) { 
+            // normalise
+            for (int k = 0; k <= 255; k++) {
                 HistogramR[k] /= width * height;
                 HistogramG[k] /= width * height;
                 HistogramB[k] /= width * height;
             }
-            //cumulative distribution
-            for (int k = 1; k <= 255; k++) { 
+            // cumulative distribution
+            for (int k = 1; k <= 255; k++) {
                 HistogramR[k] += HistogramR[k - 1];
                 HistogramG[k] += HistogramR[k - 1];
                 HistogramB[k] += HistogramR[k - 1];
             }
-            //multiply cumulative values by maximum value 255
-            for (int k = 0; k <= 255; k++) { 
+            // multiply cumulative values by maximum value 255
+            for (int k = 0; k <= 255; k++) {
                 HistogramR[k] *= 255;
                 HistogramG[k] *= 255;
                 HistogramB[k] *= 255;
             }
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    ImageArray[x][y][1] = (int)HistogramR[ImageArray[x][y][1]]; // r
-                    ImageArray[x][y][2] = (int)HistogramR[ImageArray[x][y][2]]; // g
-                    ImageArray[x][y][3] = (int)HistogramR[ImageArray[x][y][3]]; // b
+                    ImageArray[x][y][1] = (int) HistogramR[ImageArray[x][y][1]]; // r
+                    ImageArray[x][y][2] = (int) HistogramR[ImageArray[x][y][2]]; // g
+                    ImageArray[x][y][3] = (int) HistogramR[ImageArray[x][y][3]]; // b
                 }
             }
             return convertToBimage(ImageArray);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
+        }
+    }
+    
+    public BufferedImage convolution(BufferedImage timg, int[][] Mask) {
+        try {
+            //TODO Note that images are formatted as a one-byte unsigned integer per pixel and the masks
+            //TODO are formatted as one floating-point number per pixel, so the final result should be shifted
+            //TODO or converted to absolute values and re-scaled to 0-255, and rounded to one-byte
+            //TODO integers for displaying in a window and saving in a file. 
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+            int[][][] ImageArray1 = convertToArray(timg); // Convert the image to array
+            int[][][] ImageArray2 = new int[width][height][4]; // Convert the image to array
+
+            // for Mask of size 3x3
+            for (int y = 1; y < height - 1; y++) {
+                for (int x = 1; x < width - 1; x++) {
+                    int r = 0;
+                    int g = 0;
+                    int b = 0;
+                    for (int s = -1; s <= 1; s++) {
+                        for (int t = -1; t <= 1; t++) {
+                            r = r + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][1]; // r
+                            g = g + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][2]; // g
+                            b = b + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][3]; // b
+                        }
+                    }
+                    ImageArray2[x][y][1] = r; // r
+                    ImageArray2[x][y][2] = g; // g
+                    ImageArray2[x][y][3] = b; // b
+                }
+            }
+            return rescale(convertToBimage(ImageArray2));
+        } catch (Exception e) {
+            System.out.println("Failed to perform operation.");
+            return timg;
+        }
+    }
+
+    public int[][] createMask(String maskname){
+        try{
+            if(maskname == "averaging"){
+                int[][] mask = new int[3][3];
+                for(int i = 0; i < 3; i++){
+                    for(int j = 0; j < 3; j++){
+                        mask[i][j] = 1/9;
+                    }
+                }
+            }
+            if (maskname == "weightedaveraging") {
+                int[][] mask = {{1/16, 2/16, 1/16},
+                                {2/16, 4/16, 2/16},
+                                {1/16, 2/16, 1/16},
+                                };
+                return mask;
+            }
+            if (maskname == "4-neighborLaplacian") {
+                int[][] mask = {{ 0, -1, 0 }, 
+                                { -1, 4, -1 }, 
+                                { 0, -1, 0 }, 
+                                };
+                return mask;
+            }
+            if (maskname == "8-neighbor Laplacian") {
+                int[][] mask = {{ -1, -1, -1 }, 
+                                { -1, 8, -1 }, 
+                                { -1, -1, -1 }, 
+                                };
+                return mask;
+            }
+            if (maskname == "4-neighborLaplacian enhancement") {
+                int[][] mask = {{ 0, -1, 0 }, 
+                                { -1, 5, -1 }, 
+                                { 0, -1, 0 }, 
+                                };
+                return mask;
+            }
+            if (maskname == "8-neighborLaplacian enhancement") {
+                int[][] mask = { { -1, -1, -1 }, 
+                                { -1, 9, -1 }, 
+                                { -1, -1, -1 }, 
+                                };
+                return mask;
+            }
+            //TODO confused? this is two matrices?
+            if (maskname == "roberts") {
+                int[][] mask = {{ 0, 0, 0 }, 
+                                { 0, 0, -1 }, 
+                                { 0, 1, 0 }, 
+                                };
+                return mask;
+            }
+            //TODO what is "with absolute value conversion"
+            if (maskname == "sobelx") {
+                int[][] mask = {{ -1, 0, 1 }, 
+                                { -2, 0, 2 }, 
+                                { -1, 0, 1 }, 
+                                };
+                return mask;
+            }
+            if (maskname == "sobely") {
+                int[][] mask = {{ -1, -2, -1 }, 
+                                { 0, 0, 0 }, 
+                                { 1, 2, 1 }, 
+                                };
+                return mask;
+            }
+            else{
+                System.out.println("Invalid mask input");
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to create mask.");
+            return null;
         }
     }
 
@@ -730,6 +829,42 @@ public class Lab5 extends Component implements ActionListener {
             biFiltered = bi;
             diFiltered = histogram(bi);
             return;
+        case 17:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("averaging"));
+            return;
+        case 18:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("weightedaveraging"));
+            return; 
+        case 19:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("4-neighborLaplacian"));
+            return; 
+        case 20:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("8-neighborLaplacian"));
+            return;  
+        case 21:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("4-neighborLaplacianenhancement"));
+            return;  
+        case 22:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("8-neighborLaplacianenhancement"));
+            return;      
+        case 23:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("roberts"));
+            return;
+        case 24:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("sobelx"));
+            return;
+        case 25:
+            biFiltered = bi;
+            diFiltered = convolution(bi, createMask("sobely"));
+            return;
         }
     }
 
@@ -762,7 +897,7 @@ public class Lab5 extends Component implements ActionListener {
             }
         });
 
-        Lab5 de = new Lab5();
+        Lab6 de = new Lab6();
         f.add("Center", de);
 
         JComboBox choices = new JComboBox(de.getDescriptions());

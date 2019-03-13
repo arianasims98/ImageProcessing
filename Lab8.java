@@ -9,44 +9,18 @@ import java.util.Random;
 import java.lang.Math;
 import java.util.Arrays;
 
-public class Lab7 extends Component implements ActionListener {
+public class Lab8 extends Component implements ActionListener {
 
     // ************************************
     // List of the options(Original, Negative); correspond to the cases:
     // ************************************
 
-    String descs[] = { "Original", 
-            "Negative",
-            "Shift", 
-            "Add", 
-            "Subtract", 
-            "Multiply", 
-            "Divide",
-            "Bitwise Not",
-            "Bitwise And", 
-            "Bitwise Or", 
-            "Bitwise XOR", 
-            "ROI", 
-            "Log", 
-            "Power", 
-            "LUT", 
-            "Bit Plane Slice", 
-            "Histogram",
-            "Averaging", 
-            "Weighted Averaging", 
-            "4-neighbor Laplacian", 
-            "8-neighbor Laplacian",
-            "4-Neighbor Laplacian Enhancement", 
-            "8-neighbor Laplacian Enhancement", 
-            "Roberts", 
-            "Sobel X", 
-            "Sobel Y",
-            "Salt and Pepper", 
-            "Min Filter", 
-            "Max Filter", 
-            "Median Filter", 
-            "Midpoint Filter", 
-            "Salt and Pepper filtered" };
+    String descs[] = { "Original", "Negative", "Shift", "Add", "Subtract", "Multiply", "Divide", "Bitwise Not",
+            "Bitwise And", "Bitwise Or", "Bitwise XOR", "ROI", "Log", "Power", "LUT", "Bit Plane Slice", "Histogram",
+            "Averaging", "Weighted Averaging", "4-neighbor Laplacian", "8-neighbor Laplacian",
+            "4-Neighbor Laplacian Enhancement", "8-neighbor Laplacian Enhancement", "Roberts", "Sobel X", "Sobel Y",
+            "Salt and Pepper", "Min Filter", "Max Filter", "Median Filter", "Midpoint Filter",
+            "Salt and Pepper filtered", "Mean and Std Dev", "Thresholding", "Auto Threshold" };
 
     int opIndex;
     int lastOp;
@@ -58,7 +32,12 @@ public class Lab7 extends Component implements ActionListener {
     int t = -10;
     int[] LUT = generateLUT(30);
     int bitPlanes = 7;
-    public Lab7() {
+    double[] histoForMeanR = new double[256];
+    double[] histoForMeanG = new double[256];
+    double[] histoForMeanB = new double[256];
+    int threshold = 100;
+
+    public Lab8() {
         try {
             bi = ImageIO.read(new File("Barbara.bmp"));
             w = bi.getWidth(null);
@@ -244,9 +223,12 @@ public class Lab7 extends Component implements ActionListener {
             // conditional
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    // ImageArrayNew[x][y][1] = 255 * (ImageArrayNew[x][y][1] - rmin) / (rmax - rmin);
-                    // ImageArrayNew[x][y][2] = 255 * (ImageArrayNew[x][y][2] - gmin) / (gmax - gmin);
-                    // ImageArrayNew[x][y][3] = 255 * (ImageArrayNew[x][y][3] - bmin) / (bmax - bmin);
+                    // ImageArrayNew[x][y][1] = 255 * (ImageArrayNew[x][y][1] - rmin) / (rmax -
+                    // rmin);
+                    // ImageArrayNew[x][y][2] = 255 * (ImageArrayNew[x][y][2] - gmin) / (gmax -
+                    // gmin);
+                    // ImageArrayNew[x][y][3] = 255 * (ImageArrayNew[x][y][3] - bmin) / (bmax -
+                    // bmin);
                     if (ImageArrayNew[x][y][1] < 0) {
                         ImageArrayNew[x][y][1] = 0;
                     }
@@ -500,13 +482,13 @@ public class Lab7 extends Component implements ActionListener {
             int height = timg.getHeight();
 
             int[][][] ImageArray = convertToArray(timg); // Convert the image to array
-            int c = 255 / (int)(Math.log(256.0)); // preserve range 0->255
+            int c = 255 / (int) (Math.log(256.0)); // preserve range 0->255
             // Image Log Operation:
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    ImageArray[x][y][1] = (c * ((int)Math.log(ImageArray[x][y][1] + 1))); // r
-                    ImageArray[x][y][2] = (c * ((int)Math.log(ImageArray[x][y][2] + 1))); // g
-                    ImageArray[x][y][3] = (c * ((int)Math.log(ImageArray[x][y][3] + 1))); // b
+                    ImageArray[x][y][1] = (c * ((int) Math.log(ImageArray[x][y][1] + 1))); // r
+                    ImageArray[x][y][2] = (c * ((int) Math.log(ImageArray[x][y][2] + 1))); // g
+                    ImageArray[x][y][3] = (c * ((int) Math.log(ImageArray[x][y][3] + 1))); // b
                 }
             }
             return rescale(convertToBimage(ImageArray)); // Convert the array to BufferedImage
@@ -627,7 +609,6 @@ public class Lab7 extends Component implements ActionListener {
                     int g = ImageArray[x][y][2]; // g
                     int b = ImageArray[x][y][3]; // b
                     HistogramR[r]++;
-                    System.out.println("Setting histogram " + HistogramR[r]);
                     HistogramG[g]++;
                     HistogramB[b]++;
                 }
@@ -635,8 +616,11 @@ public class Lab7 extends Component implements ActionListener {
             // normalise
             for (int k = 0; k <= 255; k++) {
                 HistogramR[k] /= width * height;
+                histoForMeanR[k] = HistogramR[k];
                 HistogramG[k] /= width * height;
+                histoForMeanG[k] = HistogramG[k];
                 HistogramB[k] /= width * height;
+                histoForMeanB[k] = HistogramB[k];
             }
             // cumulative distribution
             for (int k = 1; k <= 255; k++) {
@@ -679,36 +663,48 @@ public class Lab7 extends Component implements ActionListener {
             int[][][] ImageArray2 = new int[width][height][4]; // Convert the image to array
 
             // for Mask of size 3x3
-            System.out.println("1");
             for (int y = 1; y < height - 1; y++) {
                 for (int x = 1; x < width - 1; x++) {
-                    double r = 0;
-                    double g = 0;
-                    double b = 0;
+                    int r = 0;
                     // System.out.println("2");
                     for (int s = -1; s <= 1; s++) {
                         for (int t = -1; t <= 1; t++) {
-                            r = r + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][1]; // r
-                            // System.out.println("r" + r);
-                            g = g + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][2]; // g
-                            // System.out.println("g" + g);
-                            b = b + Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][3]; // b
-                            // System.out.println("b" + b);
+                            r = Math.round(r + (float)(Mask[1 - s][1 - t] * ImageArray1[x + s][y + t][1])); // r
                         }
+                        ImageArray2[x - 1][y - 1][1] = r;
+                        ImageArray2[x - 1][y - 1][2] = r;
+                        ImageArray2[x - 1][y - 1][3] = r;
                     }
-                    // System.out.println("4");
-                    ImageArray2[x][y][1] = (int)r; // r
-                    ImageArray2[x][y][2] = (int)g; // g
-                    ImageArray2[x][y][3] = (int)b; // b
                 }
             }
-            return rescale(convertToBimage(ImageArray2));
+
+            return convertToBimage(ImageArray2);
         } catch (Exception e) {
             System.out.println("Failed to perform operation.");
             return timg;
         }
     }
 
+    public BufferedImage absVal(BufferedImage timg){
+        try {
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+
+            int[][][] ImageArray = convertToArray(timg); // Convert the image to array
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    ImageArray[y][x][1] = java.lang.Math.abs(ImageArray[y][x][1]);
+                    ImageArray[y][x][2] = java.lang.Math.abs(ImageArray[y][x][2]);
+                    ImageArray[y][x][3] = java.lang.Math.abs(ImageArray[y][x][3]);
+                }
+            }
+            return rescale(convertToBimage(ImageArray)); // Convert the array to BufferedImage
+        } catch (Exception e) {
+            System.out.println("Failed to perform operation.");
+            return timg;
+        }
+    }
     public double[][] createMask(String maskname) {
         try {
             System.out.println(maskname);
@@ -716,46 +712,37 @@ public class Lab7 extends Component implements ActionListener {
                 double[][] mask = new double[3][3];
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
-                        mask[i][j] = 1/9;
+                        mask[j][i] = 1.0 / 9.0;
+                        System.out.println(maskname);
+                        System.out.println(mask[j][i]);
                     }
                 }
                 return mask;
-            }
-            else if (maskname == "weightedAveraging") {
+            } else if (maskname == "weightedAveraging") {
                 System.out.println(maskname);
-                double[][] mask = { { 1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0 }, { 2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0 }, { 1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0 }, };
+                double[][] mask = { { 1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0 }, { 2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0 },
+                        { 1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0 }, };
                 return mask;
-            }
-            else if (maskname == "4-neighborLaplacian") {
+            } else if (maskname == "4-neighborLaplacian") {
                 double[][] mask = { { 0, -1, 0 }, { -1, 4, -1 }, { 0, -1, 0 }, };
                 System.out.println("4 neighbor" + mask[0][0]);
                 return mask;
-            }
-            else if (maskname == "8-neighborLaplacian") {
+            } else if (maskname == "8-neighborLaplacian") {
                 double[][] mask = { { -1, -1, -1 }, { -1, 8, -1 }, { -1, -1, -1 }, };
                 System.out.println("8 neighbor" + mask[0][0]);
                 return mask;
-            }
-            else if (maskname == "4-neighborLaplacianenhancement") {
+            } else if (maskname == "4-neighborLaplacianenhancement") {
                 double[][] mask = { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 }, };
                 System.out.println("enhance" + mask[0][0]);
                 return mask;
-            }
-            else if (maskname == "8-neighborLaplacianenhancement") {
+            } else if (maskname == "8-neighborLaplacianenhancement") {
                 double[][] mask = { { -1, -1, -1 }, { -1, 9, -1 }, { -1, -1, -1 }, };
                 return mask;
             }
-            // TODO confused? this is two matrices?
-            else if (maskname == "roberts") {
-                double[][] mask = { { 0, 0, 0 }, { 0, 0, -1 }, { 0, 1, 0 }, };
-                return mask;
-            }
-            // TODO what is "with absolute value conversion"
             else if (maskname == "sobelx") {
                 double[][] mask = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 }, };
                 return mask;
-            }
-            else if (maskname == "sobely") {
+            } else if (maskname == "sobely") {
                 double[][] mask = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 }, };
                 return mask;
             } else {
@@ -768,7 +755,33 @@ public class Lab7 extends Component implements ActionListener {
         }
     }
 
-    public BufferedImage saltAndPepperNoise(BufferedImage timg){
+    public BufferedImage roberts(BufferedImage timg){
+        try {
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+
+            double[][] mask1 = { { 0, 0, 0 }, { 0, 0, -1 }, { 0, 1, 0 }, };
+            double[][] mask2 = { { 0, 0, 0 }, { 0, -1, 0 }, { 0, 0, 1 }, };
+            int[][][] ImageArray1 = convertToArray(absVal(convolution(timg, mask1))); // Convert the image to array
+            int[][][] ImageArray2 = convertToArray(absVal(convolution(timg, mask2)));
+
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    ImageArray1[y][x][1] += ImageArray2[y][x][1];
+                    ImageArray1[y][x][2] += ImageArray2[y][x][2];
+                    ImageArray1[y][x][3] += ImageArray2[y][x][3];
+                }
+            }
+            return rescale(convertToBimage(ImageArray1)); // Convert the array to BufferedImage
+        } catch (Exception e) {
+            System.out.println("Failed to perform operation.");
+            return timg;
+        }
+    
+    }
+
+    public BufferedImage saltAndPepperNoise(BufferedImage timg) {
         try {
             int width = timg.getWidth();
             int height = timg.getHeight();
@@ -779,14 +792,14 @@ public class Lab7 extends Component implements ActionListener {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int n = rand.nextInt(10) + 1;
-                    //set pixels to white
-                    if(n == 1){
+                    // set pixels to white
+                    if (n == 1) {
                         ImageArray[x][y][1] = 255; // r
                         ImageArray[x][y][2] = 255; // g
                         ImageArray[x][y][3] = 255; // b
                     }
-                    //set pixels to black
-                    if(n == 2){
+                    // set pixels to black
+                    if (n == 2) {
                         ImageArray[x][y][1] = 0; // r
                         ImageArray[x][y][2] = 0; // g
                         ImageArray[x][y][3] = 0; // b
@@ -800,7 +813,7 @@ public class Lab7 extends Component implements ActionListener {
         }
     }
 
-    public BufferedImage min(BufferedImage timg){
+    public BufferedImage min(BufferedImage timg) {
         try {
             int width = timg.getWidth();
             int height = timg.getHeight();
@@ -836,7 +849,7 @@ public class Lab7 extends Component implements ActionListener {
             return timg;
         }
     }
-    
+
     public BufferedImage max(BufferedImage timg) {
         try {
             int width = timg.getWidth();
@@ -947,8 +960,168 @@ public class Lab7 extends Component implements ActionListener {
             return timg;
         }
     }
-    
-    
+
+    public BufferedImage meanAndStandDev(BufferedImage timg) {
+        try {
+            histogram(timg);
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+
+            int[][][] ImageArray = convertToArray(timg); // Convert the image to array
+            // Find mean from histogram (TODO: do this for all 3 colors?)
+            double meanR = 0;
+            double meanG = 0;
+            double meanB = 0;
+
+
+            for (int y = 0; y < 256; y++) {
+                meanR += histoForMeanR[y];
+                meanG += histoForMeanG[y];
+                meanB += histoForMeanB[y]; 
+            }
+            meanR /= height * width;
+            meanG /= height * width;
+            meanB /= height * width;
+
+            //Standard Deviation
+            double stdDevR = 0;
+            double stdDevG = 0;
+            double stdDevB = 0;
+
+            for (int y = 0; y < 256; y++) {
+                stdDevR += Math.pow((histoForMeanR[y] - meanR), 2);
+                stdDevG += Math.pow((histoForMeanG[y] - meanG), 2);
+                stdDevB += Math.pow((histoForMeanB[y] - meanB), 2);
+            }
+            stdDevR = java.lang.Math.sqrt(stdDevR / 256);
+            stdDevG = java.lang.Math.sqrt(stdDevG / 256);
+            stdDevB = java.lang.Math.sqrt(stdDevB / 256);
+            System.out.println("Mean: " + meanR + " Standard Devation R: " + stdDevR + " Standard Devation G: " + stdDevG + " Standard Devation B: " + stdDevB);
+
+
+            return timg;
+        } catch (Exception e) {
+            System.out.println("Failed to perform operation.");
+            return timg;
+        }
+    }
+
+    public BufferedImage thresholding(BufferedImage timg){
+        try {
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+
+            int[][][] ImageArray = convertToArray(timg); // Convert the image to array
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (ImageArray[x][y][1] > threshold){
+                        ImageArray[x][y][1] = 0;
+                    } else {
+                        ImageArray[x][y][1] = 255;
+                    }
+                    if (ImageArray[x][y][2] > threshold) {
+                        ImageArray[x][y][2] = 0;
+                    } else {
+                        ImageArray[x][y][2] = 255;
+                    }
+                    if (ImageArray[x][y][3] > threshold) {
+                        ImageArray[x][y][3] = 0;
+                    } else {
+                        ImageArray[x][y][3] = 255;
+                    }
+                }
+            }
+            return rescale(convertToBimage(ImageArray)); // Convert the array to BufferedImage
+        } catch (Exception e) {
+            System.out.println("Failed to perform operation.");
+            return timg;
+        }
+    }
+
+    public BufferedImage thresholdingAuto(BufferedImage timg) {
+        try {
+            int width = timg.getWidth();
+            int height = timg.getHeight();
+            int[][][] ImageArray = convertToArray(timg); // Convert the image to array
+            int tempThreshold = 0;
+            int tempThresholdNext = 0;
+            int numBackgroundR = 4;
+            int numObjectR = width*height - numBackgroundR;
+
+           // initialization
+            float meanBackgroundR = (ImageArray[0][0][1] + ImageArray[0][height - 1][1] + 
+                ImageArray[width - 1][height - 1][1] + ImageArray[width - 1][0][1]) / numBackgroundR;
+            float meanObjectR = 0;
+                for (int i = 0; i < width; i++){
+                    for (int j = 0; j < height; j++){
+                        if ((i != 0 && j != 0) && (i != width - 1 && j != height - 1)
+                            && (i != 0 && j != height - 1) && (i != width - 1 && j != 0)){
+                                meanObjectR += ImageArray[i][j][1];
+                        }
+                    }
+                }
+            meanObjectR /= numObjectR;
+            tempThresholdNext = (int)(meanBackgroundR + meanObjectR) / 2;
+
+            //thresholding step
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (ImageArray[x][y][1] > tempThresholdNext){
+                        ImageArray[x][y][1] = 0;
+                        ImageArray[x][y][2] = 0;
+                        ImageArray[x][y][3] = 0;
+                    } else {
+                        ImageArray[x][y][1] = 255;
+                        ImageArray[x][y][2] = 255;
+                        ImageArray[x][y][3] = 255;
+                    }
+                }
+            }
+
+            //iteration 
+            while( java.lang.Math.abs(tempThresholdNext - tempThreshold) > 0 ){
+                //calcuating new threshold t+1
+                tempThreshold = tempThresholdNext;
+                numBackgroundR = 0;
+                numObjectR = 0;
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        if(ImageArray[x][y][1] == 255){
+                            meanObjectR += ImageArray[x][y][1];
+                            numObjectR++;
+                        } else {
+                            meanBackgroundR += ImageArray[x][y][1];
+                            numBackgroundR++;
+                        }
+                    }
+                }
+                meanObjectR /= numObjectR;
+                meanBackgroundR /= numBackgroundR;
+                tempThresholdNext = (int)(meanBackgroundR + meanObjectR) / 2;
+
+                //thresholding
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        if (ImageArray[x][y][1] > tempThresholdNext) {
+                            ImageArray[x][y][1] = 0;
+                            ImageArray[x][y][2] = 0;
+                            ImageArray[x][y][3] = 0;
+                        } else {
+                            ImageArray[x][y][1] = 255;
+                            ImageArray[x][y][2] = 255;
+                            ImageArray[x][y][3] = 255;
+                        }
+                    }
+                }
+            }
+            return convertToBimage(ImageArray);
+        } catch(Exception e){
+        System.out.println("Failed to perform operation.");
+        return timg;
+        }
+    }
+
     // ************************************
     // You need to register your function here
     // ************************************
@@ -1054,15 +1227,15 @@ public class Lab7 extends Component implements ActionListener {
             return;
         case 23:
             biFiltered = bi;
-            diFiltered = convolution(bi, createMask("roberts"));
+            diFiltered = absVal(roberts(bi));
             return;
         case 24:
             biFiltered = bi;
-            diFiltered = convolution(bi, createMask("sobelx"));
+            diFiltered = absVal(convolution(bi, createMask("sobelx")));
             return;
         case 25:
             biFiltered = bi;
-            diFiltered = convolution(bi, createMask("sobely"));
+            diFiltered = absVal(convolution(bi, createMask("sobely")));
             return;
         case 26:
             biFiltered = bi;
@@ -1088,7 +1261,20 @@ public class Lab7 extends Component implements ActionListener {
             biFiltered = saltAndPepperNoise(bi);
             diFiltered = median(saltAndPepperNoise(bi));
             return;
+        case 32:
+            biFiltered = bi;
+            diFiltered = meanAndStandDev(bi);
+            return;
+        case 33:
+            biFiltered = bi;
+            diFiltered = thresholding(bi);
+            return;
+        case 34:
+            biFiltered = bi;
+            diFiltered = thresholdingAuto(bi);
+            return;
         }
+
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -1120,7 +1306,7 @@ public class Lab7 extends Component implements ActionListener {
             }
         });
 
-        Lab7 de = new Lab7();
+        Lab8 de = new Lab8();
         f.add("Center", de);
 
         JComboBox choices = new JComboBox(de.getDescriptions());
